@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writing Sheet Maker – なぞり書きプリント</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23b9cce4'/%3E%3Cpath d='M5 9h22M5 15h22M5 21h22M5 27h22' stroke='%23000' stroke-width='1.4'/%3E%3Cpath d='M5 21h22' stroke='%23000' stroke-width='2.6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<style id="pageSize">@page { size: A4 portrait; margin: 0; }</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="brand-mark">W</div>
+      <div><h1>WRITING SHEET</h1><p>Trace · Copy · Write on four lines</p></div>
+    </div>
+
+    <div class="field">
+      <span class="label">Word list / ことばリスト</span>
+      <div class="seg books" id="books"></div>
+    </div>
+
+    <div class="field" id="unitField">
+      <label for="unit" id="unitLabel">Unit</label>
+      <select id="unit"></select>
+    </div>
+
+    <div class="field">
+      <div class="label-row"><label for="title">Title</label><button class="btn small" id="titleReset" type="button">Reset</button></div>
+      <input type="text" id="title" maxlength="60" autocomplete="off">
+    </div>
+
+    <div class="field" id="modeField">
+      <span class="label">Practise / なにを書く？</span>
+      <div class="seg two" id="mode">
+        <button type="button" data-mode="words">Words たんご</button>
+        <button type="button" data-mode="sentences">Sentences 文</button>
+      </div>
+    </div>
+
+    <div class="opts" id="opts">
+      <div class="field">
+        <span class="label">Tracing examples / なぞる回数</span>
+        <div class="seg four" id="traces">
+          <button type="button" data-v="0">0</button><button type="button" data-v="1">1</button>
+          <button type="button" data-v="2">2</button><button type="button" data-v="3">3</button>
+        </div>
+      </div>
+      <div class="field" id="traceStyleField">
+        <span class="label">Tracing letters / なぞる文字</span>
+        <div class="seg two" id="traceStyle">
+          <button type="button" data-v="grey"><span class="demo grey">Aa</span> うすい字</button>
+          <button type="button" data-v="arrow"><span class="demo arrow">Aa</span> やじるし</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">Write by yourself / 自分で書く回数</span>
+        <div class="seg" id="writes">
+          <button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button>
+        </div>
+      </div>
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="model"> Black example first <span class="mini">お手本</span></label>
+        <label class="check" id="jaCheck"><input type="checkbox" id="showJa"> Japanese meaning <span class="mini">日本語</span></label>
+        <label class="check"><input type="checkbox" id="fill"> Fill spare space with lines <span class="mini">あまった所も4線に</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="label">Writing size / 文字の大きさ</span>
+      <div class="seg five" id="size">
+        <button type="button" data-v="auto">Auto</button><button type="button" data-v="xl">特大</button>
+        <button type="button" data-v="l">大</button><button type="button" data-v="m">中</button><button type="button" data-v="s">小</button>
+      </div>
+      <p class="hint" id="sizeHint"></p>
+    </div>
+
+    <div class="field split">
+      <div>
+        <span class="label">Paper / 用紙</span>
+        <div class="seg" id="orient">
+          <button type="button" data-v="auto">Auto</button><button type="button" data-v="portrait">たて</button><button type="button" data-v="landscape">よこ</button>
+        </div>
+      </div>
+      <div>
+        <span class="label">Pages / まい数</span>
+        <div class="seg two" id="pages">
+          <button type="button" data-v="1">1 side</button><button type="button" data-v="2">2 sides</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field split" id="countField">
+      <div>
+        <label for="count">How many / いくつ</label>
+        <select id="count">
+          <option value="auto">Auto (fits nicely)</option>
+          <option value="all">All (smaller writing)</option>
+          <option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="8">8</option>
+          <option value="10">10</option><option value="12">12</option><option value="15">15</option><option value="20">20</option>
+        </select>
+      </div>
+      <div>
+        <span class="label">Order / じゅんばん</span>
+        <div class="seg two" id="order">
+          <button type="button" data-v="list">List</button><button type="button" data-v="mix">🎲 Mix</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field split">
+      <div>
+        <span class="label">Grade / 学年</span>
+        <div class="seg two" id="grade">
+          <button type="button" data-v="low">3–4年</button><button type="button" data-v="high">5–6年</button>
+        </div>
+      </div>
+      <div>
+        <span class="label">Letters / 大文字・小文字</span>
+        <div class="seg" id="case">
+          <button type="button" data-v="as">Aa</button><button type="button" data-v="lower">abc</button><button type="button" data-v="upper">ABC</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary wide" id="print" type="button">🖨 Print</button>
+    </div>
+    <p class="hint" style="margin:-6px 0 14px" id="printHint"></p>
+
+    <div class="notes" id="notes"></div>
+
+    <div class="field" id="wordsField">
+      <div class="label-row"><label for="words">Words <span class="mini">english = 日本語</span></label><button class="btn small" id="wordsReset" type="button">Reset</button></div>
+      <textarea id="words" rows="12" spellcheck="false" placeholder="One per line, e.g.&#10;apple = りんご&#10;table tennis = たっきゅう&#10;(Japanese is filled in automatically for textbook words)"></textarea>
+      <div class="counts" id="wordCounts"></div>
+    </div>
+
+    <div class="field" id="sentField">
+      <div class="label-row"><label for="sentences">Sentences <span class="mini">english = 日本語</span></label><button class="btn small" id="sentReset" type="button">Reset</button></div>
+      <textarea id="sentences" rows="8" spellcheck="false" placeholder="One sentence per line, e.g.&#10;I like soccer. = サッカーがすきです。"></textarea>
+    </div>
+  </aside>
+
+  <main class="preview" id="preview">
+    <div class="preview-bar"><span id="status">Loading fonts…</span><span id="paperInfo"></span></div>
+    <div class="sheetset" id="sheetset"></div>
+  </main>
+</div>
+<script src="js/data.js"></script>
+<script src="js/metrics.js"></script>
+<script src="js/basics.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/render.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
