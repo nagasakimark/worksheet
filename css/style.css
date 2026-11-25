@@ -76,6 +76,31 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--ui-accent-s
 .page-wrap > .page { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .busy { opacity: .55; transition: opacity .15s; }
 
+/* names panel */
+.names-panel { border: 1px solid var(--ui-line); border-radius: 10px; padding: 10px; margin: 0 0 13px; background: #f9fbfe; }
+.names-panel .label { display: block; font-size: 12px; font-weight: 700; color: var(--ui-muted); margin: 0 0 5px; }
+.name-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.name-form label { font-size: 11.5px; font-weight: 700; color: var(--ui-muted); display: flex; flex-direction: column; gap: 2px; margin: 0; }
+.name-form label.wide { grid-column: span 3; }
+.name-form input { width: 100%; font: 15px var(--jp); padding: 6px 8px; border: 1px solid var(--ui-line); border-radius: 7px; }
+.name-form input:focus { outline: 2px solid var(--ui-accent-soft); border-color: var(--ui-accent); }
+.name-form .btn { grid-column: span 3; padding: 8px; }
+.name-form.editing .btn { background: #2f8a4c; border-color: #2f8a4c; }
+#nfMsg.err { color: #b3261e; font-weight: 700; }
+.name-tools { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.btn.file { position: relative; overflow: hidden; display: inline-block; }
+.btn.file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.name-list { max-height: 250px; overflow-y: auto; border: 1px solid var(--ui-line); border-radius: 8px; background: #fff; margin-top: 6px; font-size: 13px; }
+.name-list:empty { display: none; }
+.nl-row { display: grid; grid-template-columns: 52px 1fr auto auto; align-items: center; gap: 4px; padding: 3px 6px; border-top: 1px solid #eef2f8; }
+.nl-row:first-child { border-top: 0; }
+.nl-row.cur { background: var(--ui-accent-soft); }
+.nl-row .who { color: var(--ui-muted); font-size: 12px; }
+.nl-row button { border: 0; background: none; cursor: pointer; font-size: 13px; padding: 2px 5px; border-radius: 5px; color: var(--ui-muted); }
+.nl-row button:hover { background: #eef3fa; color: var(--ui-text); }
+.nl-head { padding: 4px 6px; font-size: 11.5px; font-weight: 700; background: #f3f6fb; color: var(--ui-muted); position: sticky; top: 0; }
+.seg.multi button.on { background: var(--ui-accent); }
+
 /* ================= worksheet pages ================= */
 .page { position: relative; overflow: hidden; background: var(--frame); color: var(--ink);
   -webkit-print-color-adjust: exact; print-color-adjust: exact; font-family: var(--jp); }
@@ -99,6 +124,8 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--ui-accent-s
 .bands .nh-arrow { font-family: 'NH TW'; fill: #000; }
 .bands .nh-grey { font-family: 'NH Medium'; fill: var(--trace); }
 .bands .ja { font-family: var(--jp); fill: #333; }
+.bands .sec { font-family: var(--jp); font-weight: 700; fill: #1d3d6b; }
+.nameline.filled { text-align: center; font: 700 4.4mm/6.6mm var(--jp); }
 .overflow { outline: 0.6mm solid #ff00aa; }
 
 /* ================= print ================= */

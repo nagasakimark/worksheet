@@ -15,6 +15,7 @@
       model: 'お手本を 見て、4線に 書こう！',
       test: '日本語を 見て、英語で 書こう！',
       blank: '4線に ていねいに 書こう！',
+      names: 'じぶんの 名前を なぞってから、書いてみよう！',
     },
     kanji: {
       grey: 'うすい字をなぞってから、自分で書きましょう。',
@@ -22,11 +23,13 @@
       model: 'お手本を見て、4線に書きましょう。',
       test: '日本語を見て、英語で書きましょう。',
       blank: '4線にていねいに書きましょう。',
+      names: '自分の名前をなぞってから、ていねいに書きましょう。',
     },
-    en: { grey: 'Trace and write!', arrow: 'Trace and write!', model: 'Look and write!', test: 'Write in English!', blank: "Let's write!" },
+    en: { grey: 'Trace and write!', arrow: 'Trace and write!', model: 'Look and write!', test: 'Write in English!', blank: "Let's write!", names: 'Write your name!' },
   };
   function instKind(m) {
     if (m.blank) return 'blank';
+    if (m.names) return 'names';
     if (m.P.traces) return m.P.traceStyle === 'arrow' ? 'arrow' : 'grey';
     return m.P.model ? 'model' : 'test';
   }
@@ -60,9 +63,11 @@
     const y = 8.6, h = 6.6, R = W - 13;
     const fields = [['番', 9], ['組', 8], ['年', 8]];
     let x = R;
+    const st = m.student || {};
+    const fill = { '番': st.num, '組': st.cls, '年': st.year };
     for (const [label, gapW] of fields) {
       x -= 4.4; box(page, x, y, 4.4, h, 'namefield', label);
-      x -= gapW; box(page, x, y, gapW, h, 'nameline');
+      x -= gapW; box(page, x, y, gapW, h, 'nameline filled', fill[label] != null ? esc(fill[label]) : '');
       x -= 2;
     }
     box(page, 13.5, y, 10, h, 'namefield', '名前');
@@ -84,17 +89,17 @@
     return ctx.measureText(text).width / 10;
   }
   function bandsSvg(m, pg, W, H) {
-    const L = m.L, B = L.B, lab = L.lab;
-    const inner = LY.innerGap(B);
+    const L = m.L;
     let s = '';
     for (const row of pg.rows) {
+      const B = row.B || L.B, lab = row.lab || L.lab, inner = LY.innerGap(B);
       for (const cell of row.cells) {
         const cx = pg.area.x + cell.x, F = cell.plan.F;
         const rowW = L.rowW;
         if (lab.f && cell.item && cell.item.ja) {
           const f = lab.f, tw = jaWidth(cell.item.ja, f);
           const fit = tw > rowW - 1 ? ` textLength="${(rowW - 1).toFixed(2)}" lengthAdjust="spacingAndGlyphs"` : '';
-          s += `<text class="ja" x="${(cx + 0.6).toFixed(2)}" y="${(row.y + f * 0.98).toFixed(2)}" font-size="${f.toFixed(2)}"${fit}>${esc(cell.item.ja)}</text>`;
+          s += `<text class="${cell.item.sec ? 'sec' : 'ja'}" x="${(cx + 0.6).toFixed(2)}" y="${(row.y + f * 0.98).toFixed(2)}" font-size="${f.toFixed(2)}"${fit}>${esc(cell.item.ja)}</text>`;
         }
         const n = Math.max(1, Math.round(rowW / (LY.PIPE * F)));
         const pipes = '|'.repeat(n);

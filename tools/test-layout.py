@@ -41,7 +41,8 @@ CHECK_JS = r"""
       if (ox > 0.5 && oy > 0.5) probs.push(`p${pi + 1} bands overlap`);
     }
   });
-  if (pages.length > m.P.pages) probs.push(`too many pages: ${pages.length}`);
+  const allowed = m.names ? (window.__lastModels || []).length * m.P.pages : m.P.pages;
+  if (pages.length > allowed) probs.push(`too many pages: ${pages.length}`);
   return { probs, pages: pages.length, B: m.L.B, cols: m.L.cols, orient: m.L.orient, used: m.L.used, total: m.L.total };
 }
 """
@@ -85,6 +86,24 @@ async def main():
                         if r['probs']:
                             fails += 1
                             print(f'FAIL {book}/{unit} {mode} cfg{ci} opt{oi}:', r['probs'][:4])
+        # student name sheets
+        await pg.evaluate("""() => { WS.state.students = [
+          { id: 'a', year: '3', cls: '1', num: '1', first: 'Yu', last: 'Ito' },
+          { id: 'b', year: '3', cls: '1', num: '2', first: 'Kotaro', last: 'Watanabe' },
+          { id: 'c', year: '6', cls: '2', num: '31', first: 'Shinnosuke', last: 'Hasegawa' },
+          { id: 'd', year: '6', cls: '2', num: '32', first: 'Mary-Ann', last: 'Fitzgerald-Yamamoto' },
+          { id: 'e', year: '6', cls: '2', num: '33', first: 'Ken', last: '' } ]; WS.state.nameShow = 'all'; }""")
+        for size in ['auto', 'xl', 's']:
+            for pages in [1, 2]:
+                for grade in ['low', 'high']:
+                    for opt in OPTS:
+                        await pg.evaluate("o => Object.assign(WS.state.opt.names, o, { writes: Math.max(1, o.writes) })", opt)
+                        await pg.evaluate("([s, p, g]) => WS.select('names', null, { size: s, pages: p, grade: g, orient: 'auto' })", [size, pages, grade])
+                        r = await pg.evaluate(CHECK_JS)
+                        runs += 1
+                        if r['probs']:
+                            fails += 1
+                            print(f'FAIL names size={size} pages={pages} {grade} {opt}:', r['probs'][:4])
         print(f'{runs} sheets checked, {fails} with problems' + (f', JS errors: {errs[:3]}' if errs else ''))
         await b.close()
         sys.exit(1 if fails or errs else 0)

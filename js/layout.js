@@ -266,5 +266,97 @@
     return L;
   }
 
-  global.Layout = { plan, innerGap, textW, area, PAGE, SIZES, RANGE, EM_BAND, BASE_IN_BAND, PIPE };
+  // ---------- Student name sheets ----------
+  // One student per sheet. Each name part (first / last / full) is practised at 3 sizes, big to small.
+  // The sizes shrink together until everything fits, then spare space becomes extra writing lines
+  // (mostly at the smaller, everyday sizes). Side 2 (optional) is copy-writing with a black example.
+  const NAME_BIG = { auto: { low: 18, high: 15.5 }, xl: 22, l: 18, m: 14.5, s: 11.5 };
+  const NAME_HEAD = { f: 4.3, h: 6.6 };
+  function planNames(st, P) {
+    const orient = P.orient === 'landscape' ? 'landscape' : 'portrait';
+    const big0 = P.size === 'auto' ? NAME_BIG.auto[P.grade] : NAME_BIG[P.size];
+    const parts = [];
+    const fix = t => P.letterCase === 'upper' ? t.toUpperCase() : P.letterCase === 'lower' ? t.toLowerCase() : t;
+    const full = P.order === 'lf' ? [st.last, st.first] : [st.first, st.last];
+    if (P.parts.first && st.first) parts.push({ key: 'first', text: fix(st.first), head: 'First name　下の名前' });
+    if (P.parts.last && st.last) parts.push({ key: 'last', text: fix(st.last), head: 'Last name　名字（みょうじ）' });
+    if (P.parts.full && st.first && st.last) parts.push({ key: 'full', text: fix(full.join(' ')), head: 'Full name　フルネーム' });
+    if (!parts.length) return { empty: true, notes: ['Nothing to practise – tick First, Last or Full name.'] };
+
+    function build(pageIndex, scale, drop, extra, Q) {
+      const a = area(orient, pageIndex);
+      const sizes = [1, 0.72, 0.56].slice(0, 3 - drop);
+      const per = sizes.length;
+      // plans first, so every name part gets the same number of lines at each size
+      const plans = [];
+      for (let pi = 0; pi < parts.length; pi++) {
+        for (let si = 0; si < per; si++) {
+          // the full name is longer, so it starts one step smaller (the size it is written at on name lines)
+          const k = parts[pi].key === 'full' ? sizes[si] * 0.8 : sizes[si];
+          const B = Math.max(ABS_MIN, +(big0 * scale * k).toFixed(2));
+          // the chosen number of write copies at the biggest size; smaller sizes need 1 (spare lines come later)
+          const Qs = si === 0 ? Q : Object.assign({}, Q, { writes: 1 });
+          const plan = planItem({ text: parts[pi].text }, Qs, B, a.w, extra[pi * per + si] || 0);
+          if (!plan) return { rows: [], used: Infinity, a, groups: parts.length * per };
+          plans.push({ plan, B, pi, si });
+        }
+      }
+      for (let si = 0; si < per; si++) {
+        const tier = plans.filter(p => p.si === si && parts[p.pi].key !== 'full'); // first & last match; full name is longer
+        const nb = Math.max(...tier.map(p => p.plan.bands.length));
+        for (const p of tier) while (p.plan.bands.length < nb) p.plan.bands.push({ slots: [] });
+      }
+      const rows = [];
+      let y = 0;
+      for (const { plan, B, pi, si } of plans) {
+        const lab = si === 0 ? NAME_HEAD : { f: 0, h: 0 };
+        const n = plan.bands.length;
+        const h = lab.h + n * B + (n - 1) * innerGap(B);
+        if (rows.length) y += si === 0 ? rowGap(B) + 2.5 : rowGap(B) * 0.8;
+        rows.push({ y, h, B, lab, cells: [{ x: 0, plan, item: si === 0 ? { ja: parts[pi].head, sec: true } : null }] });
+        y += h;
+      }
+      return { rows, used: y, a, groups: plans.length };
+    }
+    function fitPage(pageIndex, Q) {
+      for (let drop = 0; drop <= 1; drop++) {
+        for (let scale = 1; scale >= 0.55; scale -= 0.04) {
+          let r = build(pageIndex, scale, drop, [], Q);
+          if (r.used > r.a.h) continue;
+          // lots of room: add extra lines in matching sets (same size for every name part),
+          // smallest everyday size first, until nothing more fits
+          const extra = new Array(r.groups).fill(0);
+          const per = 3 - drop;
+          const tiers = [];
+          for (let t = per - 1; t >= 0; t--) tiers.push(parts.map((_, p) => p * per + t));
+          let grew = true;
+          while (grew) {
+            grew = false;
+            for (const tier of tiers) {
+              tier.forEach(g => extra[g]++);
+              const t = build(pageIndex, scale, drop, extra, Q);
+              if (t.used <= t.a.h) { r = t; grew = true; } else tier.forEach(g => extra[g]--);
+            }
+          }
+          // spread what is left a little
+          const left = r.a.h - r.used, n = r.rows.length;
+          const add = n > 1 ? Math.min(4, left / (n - 1)) : 0;
+          r.rows.forEach((row, i) => { row.y += r.a.y + i * add; });
+          return { rows: r.rows, area: r.a, used: r.used, B: +(big0 * scale).toFixed(2) };
+        }
+      }
+      return null;
+    }
+    const pages = [];
+    const p1 = fitPage(0, P);
+    if (!p1) return { empty: true, notes: ['The name is too long to fit across the paper.'] };
+    pages.push(p1);
+    if (P.pages === 2) {
+      const p2 = fitPage(1, Object.assign({}, P, { model: true, traces: 0 }));
+      if (p2) pages.push(p2);
+    }
+    return { orient, cols: 1, B: p1.B, rowW: area(orient, 0).w, lab: { f: 0, h: 0 }, pages, notes: [], names: true, P };
+  }
+
+  global.Layout = { plan, planNames, innerGap, textW, area, PAGE, SIZES, RANGE, EM_BAND, BASE_IN_BAND, PIPE };
 })(typeof window !== 'undefined' ? window : globalThis);

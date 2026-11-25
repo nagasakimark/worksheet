@@ -27,6 +27,41 @@
       <select id="unit"></select>
     </div>
 
+    <div class="names-panel" id="namesPanel">
+      <span class="label">Add a student / 児童を追加</span>
+      <div class="name-form" id="nameForm">
+        <label>年<input id="nfYear" inputmode="numeric" maxlength="3" autocomplete="off"></label>
+        <label>組<input id="nfClass" maxlength="4" autocomplete="off"></label>
+        <label>番<input id="nfNum" inputmode="numeric" maxlength="3" autocomplete="off"></label>
+        <label class="wide">First name 名<input id="nfFirst" maxlength="30" autocomplete="off" placeholder="Taro / たろう"></label>
+        <label class="wide">Last name 姓<input id="nfLast" maxlength="30" autocomplete="off" placeholder="Yamada / やまだ"></label>
+        <button class="btn primary" id="nfAdd" type="button">Add ↵</button>
+      </div>
+      <p class="hint" id="nfMsg">Type romaji or かな (かな becomes romaji). 年 and 組 carry on to the next student; 番 counts up and starts at 1 for a new class. Press Enter to add.</p>
+      <div class="name-tools">
+        <button class="btn small" id="nTemplate" type="button">⬇ Excel template</button>
+        <label class="btn small file">⬆ Import Excel<input type="file" id="nImport" accept=".xlsx,.csv,.txt,.tsv"></label>
+        <button class="btn small" id="nExport" type="button">⬇ Save list</button>
+        <button class="btn small" id="nClear" type="button">Clear all</button>
+      </div>
+      <div class="label-row" style="margin-top:8px"><label for="nShow">Show &amp; print</label><span class="mini" id="nCount"></span></div>
+      <select id="nShow"></select>
+      <div class="name-list" id="nameList"></div>
+      <p class="hint">Names stay in this browser on this computer only.</p>
+      <div class="field" style="margin-top:10px">
+        <span class="label">Practise / れんしゅう</span>
+        <div class="seg" id="nParts">
+          <button type="button" data-v="first">First 名</button><button type="button" data-v="last">Last 姓</button><button type="button" data-v="full">Full name</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">Full name order / フルネームの順番</span>
+        <div class="seg two" id="nOrder">
+          <button type="button" data-v="fl" id="nOrderFL">Taro Yamada</button><button type="button" data-v="lf" id="nOrderLF">Yamada Taro</button>
+        </div>
+      </div>
+    </div>
+
     <div class="field">
       <div class="label-row"><label for="title">Title</label><button class="btn small" id="titleReset" type="button">Reset</button></div>
       <input type="text" id="title" maxlength="60" autocomplete="off">
@@ -55,7 +90,7 @@
           <button type="button" data-v="arrow"><span class="demo arrow">Aa</span> やじるし</button>
         </div>
       </div>
-      <div class="field">
+      <div class="field" id="writesField">
         <span class="label">Write by yourself / 自分で書く回数</span>
         <div class="seg" id="writes">
           <button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button>
@@ -64,7 +99,7 @@
       <div class="checks">
         <label class="check"><input type="checkbox" id="model"> Black example first <span class="mini">お手本</span></label>
         <label class="check" id="jaCheck"><input type="checkbox" id="showJa"> Japanese meaning <span class="mini">日本語</span></label>
-        <label class="check"><input type="checkbox" id="fill"> Fill spare space with lines <span class="mini">あまった所も4線に</span></label>
+        <label class="check" id="fillCheck"><input type="checkbox" id="fill"> Fill spare space with lines <span class="mini">あまった所も4線に</span></label>
       </div>
     </div>
 
@@ -154,6 +189,8 @@
 <script src="js/basics.js"></script>
 <script src="js/layout.js"></script>
 <script src="js/render.js"></script>
+<script src="js/romaji.js"></script>
+<script src="js/xlsx.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
